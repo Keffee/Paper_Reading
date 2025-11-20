@@ -5,3 +5,6 @@ idea随想.md
 try.ipynb
 code/
 审稿记录.md
+*.png
+*.jpg
+.DS_Store
