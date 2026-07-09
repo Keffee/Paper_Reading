@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TaylorMix Intro 行文需求</title>
+  <style>
+    :root{
+      --ink:#18212f;
+      --muted:#5a6678;
+      --line:#d9e1ec;
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --accent:#1f6feb;
+      --soft:#eef5ff;
+      --warn:#8a4b00;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font:15px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;
+    }
+    .wrap{max-width:1080px;margin:0 auto;padding:36px 24px 56px}
+    header{margin-bottom:22px}
+    h1{font-size:30px;line-height:1.2;margin:0 0 10px}
+    .sub{color:var(--muted);font-size:14px}
+    section{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:20px 22px;
+      margin:14px 0;
+      box-shadow:0 1px 2px rgba(18,31,54,.04);
+    }
+    h2{font-size:19px;margin:0 0 12px;border-left:4px solid var(--accent);padding-left:10px}
+    h3{font-size:16px;margin:18px 0 8px}
+    p{margin:8px 0}
+    ul{margin:8px 0 0 22px;padding:0}
+    li{margin:5px 0}
+    b{font-weight:700}
+    code{
+      background:#eef1f5;
+      border:1px solid #dfe5ec;
+      border-radius:4px;
+      padding:1px 5px;
+      font-family:Consolas,"SFMono-Regular",monospace;
+      font-size:.94em;
+    }
+    .rule{
+      background:var(--soft);
+      border-left:4px solid var(--accent);
+      padding:10px 12px;
+      border-radius:6px;
+      margin:10px 0;
+    }
+    .avoid{
+      background:#fff7ed;
+      border-left:4px solid var(--warn);
+      padding:10px 12px;
+      border-radius:6px;
+      margin:10px 0;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:12px;
+    }
+    .mini{
+      border:1px solid var(--line);
+      border-radius:8px;
+      padding:12px;
+      background:#fbfdff;
+    }
+    .mini h3{margin-top:0}
+    table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+    th,td{border:1px solid var(--line);padding:8px 10px;vertical-align:top}
+    th{background:#f0f4f9;text-align:left}
+    .check li{list-style:"□  ";padding-left:4px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>TaylorMix Intro 行文需求</h1>
+    <div class="sub">用于约束 Introduction 与后续 LaTeX 正文的写作风格、术语顺序和贡献口径。</div>
+  </header>
+
+  <section>
+    <h2>总体原则</h2>
+    <div class="rule">
+      Intro 的目标读者是审稿人，不是作者自己。正文必须让不了解内部实验名、版本号、实现细节的人也能顺着读。
+    </div>
+    <ul>
+      <li>行文采用逐步收窄的论证：数据分布影响 loss → online RLVR 中每步 batch 选择重要 → 数据管理视角下这是状态驱动的受约束选择查询 → 两类已有线索 → 两个缺口 → TaylorMix 的两层设计 → 理论确认 Taylor 对应关系 → 实验验证。</li>
+      <li>语气要确定、克制、顶会论文式。不要像内部备忘录，也不要像在为近似方法辩解。</li>
+      <li>每句话都要回答“为什么这句话现在出现”。不要突然抛出术语、版本名、实验指标或内部简称。</li>
+      <li><b>结论段要有证据来源,但不重复具体表格数值。</b>表后结论、章节结论和最终 Conclusion 可以使用 <code>1).</code>、<code>2).</code> 分点;每一点要写清楚“从表 X 可以看出”或“结合图 X 可以看出”,随后只写相对现象与机制解释,可以写“略高”“明显下降”“归零”“整体更均衡”等,但不要写具体指标值、delta、百分比、步数、样本数、模型规模或逐格报数;不要只写“由表 X 可以得到以下结论”这种空模板。具体数值留在表格和表格说明中。</li>
+      <li>全文每个数学符号都要可追溯：读者应能从前文定义、当前公式上下文或明确配置项推出其含义。若某个符号首次出现,或不能由前文符号直接推出,必须在正文紧随其后用自然句解释其来源、含义和计算方式。</li>
+      <li>正文负责让人读懂逻辑；灰色术语行可以放学名、引用备注、内部映射和后续实现细节。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>叙事顺序</h2>
+    <table>
+      <thead><tr><th>位置</th><th>功能</th><th>写作要求</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>① 痛点</td>
+          <td>说明为什么 online RLVR 中 batch composition 是重要数据选择问题。</td>
+          <td>只讲 batch 中的 training cases 决定 rollout、reward、更新方向；不要提前讲方法。</td>
+        </tr>
+        <tr>
+          <td>② 为什么是两层</td>
+          <td>从数据库/数据管理视角引出状态驱动的受约束选择查询。</td>
+          <td>正文说“每步从训练池里按约束选出 batch”；术语行再写 stateful constrained selection query。</td>
+        </tr>
+        <tr>
+          <td>③ 已有两类尝试</td>
+          <td>归纳领域/分布重分配与样本/候选重排两类线索。</td>
+          <td>候选类必须提到完整影响估计通常涉及 Hessian 逆或其近似；不要说所有方法精确求逆。</td>
+        </tr>
+        <tr>
+          <td>④ 两个缺口</td>
+          <td>提出领域边界解与候选更新风险两个缺口。</td>
+          <td>不要正式引出 TaylorMix；可用“本文方法”“完整版本”“风险项”等中性说法。</td>
+        </tr>
+        <tr>
+          <td>⑤ 本文方法</td>
+          <td>首次正式推出 TaylorMix。</td>
+          <td>采用“针对 A，TaylorMix 做 B，从而 C”的结构。每个“从而”后必须是目标或效果。</td>
+        </tr>
+        <tr>
+          <td>⑥ 为什么可信</td>
+          <td>说明理论确认 TaylorMix 两层选择对应 Taylor 一阶/二阶主项。</td>
+          <td>要写成确定性结论，不要写成“近似够用”的防守口吻。</td>
+        </tr>
+        <tr>
+          <td>⑦ 结果与贡献</td>
+          <td>总结新问题、两个挑战解决和实验性贡献。</td>
+          <td>贡献顺序：新问题 → 领域分配挑战 → 候选风险挑战 → 真实 RLVR 验证。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>术语与首次出现</h2>
+    <div class="grid">
+      <div class="mini">
+        <h3>缩写</h3>
+        <ul>
+          <li><b>RLVR</b> 首次正文出现写全：Reinforcement Learning with Verifiable Rewards。</li>
+          <li><b>GRPO</b> 首次正文出现写全：Group Relative Policy Optimization。</li>
+          <li><b>KL</b> 第一次用于正则时写成 KL 散度正则或 KL 散度正则化。</li>
+        </ul>
+      </div>
+      <div class="mini">
+        <h3>方法名</h3>
+        <ul>
+          <li>TaylorMix 在方法段正式引出。</li>
+          <li>方法段之前避免写 TaylorMix Full；用“完整版本”“保留该风险项的版本”等。</li>
+          <li>图里如果 legend 已经写 TaylorMix Full，正文图注仍可解释为“完整版本”。</li>
+        </ul>
+      </div>
+      <div class="mini">
+        <h3>数据对象</h3>
+        <ul>
+          <li>Intro 统一用 <code>training cases</code> / <code>cases</code>。</li>
+          <li>不要在 intro 里频繁切换 prompt、sample、case。</li>
+          <li>“prompt”可在 Method 里解释为实现入口。</li>
+        </ul>
+      </div>
+      <div class="mini">
+        <h3>影响估计</h3>
+        <ul>
+          <li>已有完整影响估计：可写 Hessian 逆或近似 Hessian 逆。</li>
+          <li>我们的候选层：写低维二阶风险代理或低维候选风险实现。</li>
+          <li>不要写“我们不需要 Hessian”这种容易被质疑的表述。</li>
+        </ul>
+      </div>
+      <div class="mini">
+        <h3>公式符号</h3>
+        <ul>
+          <li>每个符号首次出现时必须说明来源：来自前文状态、当前候选集合、训练前配置、慢时钟缓存,还是理论接口。</li>
+          <li>若符号由已有符号计算得到,正文要给出计算关系或文字口径,例如 <code>rel_i</code> 由 case 表示 <code>h_i</code> 与目标表示原型 <code>p_\star</code> 的余弦相似度计算；首次出现 <code>p_c</code>、<code>p_\star</code> 时必须说明 <code>p</code> 表示 prototype,不引入新的分数项。</li>
+          <li>若符号是配置量或超参数,必须说明它是否固定、是否归一化、取值约束是什么。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>风险与图</h2>
+    <ul>
+      <li>Intro 中的图只是“风险例子”，不是正式消融结论。</li>
+      <li>不要写“消融日志例子”。用“风险例子”。</li>
+      <li>图注要解释指标：<code>actor gradient norm</code> 写成“策略网络梯度范数”；<code>KL jump</code> 写成“策略 KL 跳变”。</li>
+      <li>图的核心读法：去掉二阶风险项的版本出现梯度尖峰，完整版本没有超过触发线。</li>
+      <li>不要使用“过尖”这种自造词。优先使用“不稳定更新”“梯度尖峰”“更新风险”。</li>
+      <li>不要把 entropy 作为主风险论据，因为低 entropy 容易被解释成“更确定”。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>方法段写法</h2>
+    <div class="rule">
+      Method 的目标读者仍然是审稿人，不是复现实验的工程同事。方法段不能写成实现清单或技术报告；每个设计都要先交代它解决哪个论文问题，再给出可执行定义，最后说明它带来的收益。
+    </div>
+    <ul>
+      <li>方法章开头必须先承接 intro 已经敲定的两个缺口，再落到问题定义：<code>为了解决 intro 中的领域边界分配和候选单步更新风险问题，TaylorMix 将定义 2 的 batch-composition query 具体化为……</code>。不要把“TaylorMix 是定义 2 中 \(\operatorname{Select}_t\) 的实现”写成主句；定义 2 只是形式化接口，真正的写作重心是 TaylorMix 回答 intro 中的哪些问题。</li>
+      <li>每个方法小节采用同一条逻辑链：<code>为了 A，TaylorMix 做 B；具体地，定义/计算 C；从而 D</code>。</li>
+      <li><code>A</code> 必须是 intro、related work 或问题定义中已经提出的问题或挑战，例如领域边界解、候选更新风险、在线 batch 选择开销、GRPO 训练信号由 cases 决定。</li>
+      <li><code>B</code> 是论文层面的设计动作，例如用 Taylor 一阶项做领域分配、用 KL 散度正则化分配、用低维二阶风险代理筛选候选。</li>
+      <li><code>C</code> 才放公式、符号或算法细节。公式必须服务于上一句的设计目标，不要先扔公式再解释。</li>
+      <li>第三章不只在开头承接 intro。每个 §3.x 小节的第一段都要说明它接住前文哪一环：§3.1 接定义 2 的两个控制量，§3.2 接“为什么用 Taylor 展开统一两个缺口”，§3.3 接领域边界解，§3.4 接候选单步更新风险，§3.5 接最终 batch 生成，§3.6 接在线反馈与下一步选择。</li>
+      <li>小节开头不要写成元话语，例如“本节解释……”“本节接住……”“本节把……”。应改成承上启下的论文句：前半句明确接上一章/上一节已经建立的问题或变量，后半句自然引出当前小节要完成的设计动作。</li>
+      <li>方法段不要写成“标签: 公式 + 其中”的技术报告形态，例如不要出现“GRPO 入口:”“一步效用:”“最终分数:”这类小标签。应先用论文正文句说明设计目的，再把关键公式单独成块展示，随后用自然句解释符号和收益。</li>
+      <li>正文中的公式不能只依赖符号表。每个主公式第一次出现时,紧跟一句自然语言解释新符号,并说明这些符号能否由前文状态、前文公式或配置项推出；符号表只作总览,不能替代正文解释。</li>
+      <li>抽象函数第一次出现时要交代输入空间、默认形式和选择原因。例如 <code>\operatorname{dist}</code> 不能只写“距离”,要说明它是在领域向量空间中计算、默认用余弦距离,以及为何适合当前设计。</li>
+      <li>核心正则项不能只写公式。若正则项支撑主要贡献,必须说明它匹配哪个变量的几何结构、解决哪个缺口、相对显然替代方案有什么优势。</li>
+      <li>公式中的选择对象要直观命名：本步 batch 统一写作 <code>\mathcal{B}_t</code>，领域内选中 cases 写作 <code>\mathcal{B}_{c,t}</code>，不要用 <code>S_t</code> 这类容易被误读为序列或状态集合的符号。</li>
+      <li>方法段后面会反复使用的在线状态变量必须在 Preliminary / Problem Definition 中定义清楚，例如 <code>\mathcal{H}_t</code> 要先作为选择状态出现，再在方法段说明如何使用和更新。</li>
+      <li><code>D</code> 必须是收益或目标，例如保留领域覆盖、避免过早边界分配、识别更高更新风险的 cases、支持每步在线运行。</li>
+      <li>每个核心方法动作都要标明它承接哪个 Taylor 主项：领域分配承接一阶收益方向，候选风险代理承接二阶曲率风险，最终分数合成二者。</li>
+      <li>每个核心方法动作都要标明由 §4 哪个 theorem 与 proof 校准：§4.1 先给出 Theorem 1 (Preview) 和 Theorem 2 (Preview) 概览 Taylor 对应关系，§4.2 给出 Proof of Theorem 1，对应领域成本和 KL 分配，§4.3 给出 Proof of Theorem 2，对应低维候选风险与候选筛选。</li>
+      <li>小节之间要显式连接。章节顺序可以根据论文逻辑调整,但必须让读者看清:选择对象是什么、为什么要用 Taylor 展开、哪些设计承接一阶项、哪些设计承接二阶项、二者如何合成最终 batch、在线反馈如何进入下一步选择。</li>
+      <li>方法段可以有公式，但公式数量服从逻辑。保留主公式，删掉只服务实现复现、且不能推进论文主张的符号。</li>
+      <li>Algorithm 要写成论文伪代码，而不是编号说明清单。应使用 <code>Input</code>、<code>Output</code>、<code>for ... do</code>、<code>end for</code>、必要的 <code>if</code>、<code>sample</code>、<code>return</code>、集合更新和 <code>\leftarrow</code> 赋值，让读者看到领域循环、候选循环、采样循环和状态更新的控制流。</li>
+      <li>Algorithm 中的采样过程要显式表达无放回：抽中一个 case 后从候选集合移除。采样算子命名保持直观，写 <code>Softmax</code> 即可，不使用 <code>SeqSWOR</code>、<code>SoftmaxWOR</code> 这类抽象名。</li>
+      <li>正文引用 Algorithm 时优先引用语义动作或循环，例如“领域成本与配额循环”“候选评分与 softmax 采样循环”；避免依赖“第 5--6 步”这类脆弱行号引用，除非最终排版已经锁定。</li>
+      <li>不要写代码路径、类名、版本名、刷新频率等技术报告信息。必要实现映射放灰色术语行，正文只保留读者理解方法所需的抽象机制。</li>
+      <li>方法段每处理论引用都要说明它校准哪个方法动作：§4.2 校准领域成本与 Taylor 一阶下降方向，§4.3 校准低维候选风险与 Taylor 二阶曲率风险。</li>
+      <li>避免把方法写成“我们先做 X，再做 Y，再做 Z”的流水账。每一步都要回答“为什么做、怎么做、做完有什么收益”。</li>
+      <li>若使用 Taylor 展开或 oracle utility,必须先说明哪些量只是理论接口、哪些量是在线可观测代理。不要让读者误以为选择器在 rollout 前已经知道 <code>g_t(\mathcal B)</code>、<code>\nabla M</code> 或 <code>\nabla^2M</code>。</li>
+      <li><code>M</code> 统一解释为训练期 selection target loss,并说明它与最终测试集隔离。不要在方法段含混地写“目标/验证 loss”而不解释其可访问性。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>理论可信性写法</h2>
+    <div class="rule">
+      理论段要直接扣回 TaylorMix 的方法动作，而不是抽象地说“领域层”“候选层”。
+    </div>
+    <ul>
+      <li>不要说“第 3 章的两层选择”，要说“TaylorMix 的两层选择”。</li>
+      <li>§4 必须按论文正文的定理证明结构展开：连续段落先交代 Taylor 展开、符号来源和方法动作，再给出 <code>Theorem 1 (Preview)</code>、<code>Theorem 2 (Preview)</code>、<code>Proof of Theorem 1</code> 与 <code>Proof of Theorem 2</code>。可见正文避免“说明/结论/标签 + 公式”的卡片式提纲。</li>
+      <li>§4 的段落之间必须有显式逻辑承接：上一段提出的读者问题,下一段要给出回答或推进；公式前说明为什么需要该公式,公式后说明它如何回到 TaylorMix 的领域分配、候选评分或采样动作。面向非本领域审稿人时,先用直观句解释一阶下降、二阶风险、曲率和 sketch,再给专业符号。</li>
+      <li>§4 与 §3 的 Taylor 符号必须一致：先固定任意训练步 <code>t</code>,说明下文省略时间下标,再写 <code>\theta=\theta_t</code>、<code>g=\nabla M(\theta_t)</code>、<code>H=\nabla^2M(\theta_t)</code>。<code>Theorem 1 (Preview)</code>、<code>Theorem 2 (Preview)</code> 及两个 proof 都必须从同一个 <code>\mathcal T(u)=M(\theta)-M(\theta-\eta u)</code> 出发；领域项优先直接写 <code>\mathcal T(\widehat\mu_c)</code>,候选项优先直接写 <code>\mathcal T(u_i)</code>,不要一个用 loss-change 方向、另一个用 utility 方向。</li>
+      <li>§3 和 §4 要尽量节省符号。同一意义不要前后换名：候选真实一阶项直接写 <code>g^\top u_i</code>,在线近似沿用 §3 的 <code>U_i^{(1)}</code>；参数空间二阶项直接写 <code>u_i^\top H u_i</code>,低维风险沿用 <code>Curv_i^{op}</code> 和 <code>Curv_i^{sk}</code>。不要再引入 <code>V_i^{(1)}</code>、<code>Q_i</code>、<code>T_1/T_2</code>、<code>\widehat S_i^{\rm Tay}</code> 等只起换名作用的符号。</li>
+      <li>论文正文不得出现作者视角的穿帮语句,例如“对读者而言”“本章要说明”“下面先说明”“证明任务是”“直观地说”等。应改成论文内部的逻辑句,直接说明对象、问题、公式作用和结论。</li>
+      <li>理论段避免画蛇添足的旁白句,例如“实际实现中的……”“这里的公式不要求……”“这条界的作用是……”“这个结论解释了为什么……”。需要表达的内容应直接写成论文结论,例如“低维曲率保留二阶风险排序”“该项作为候选分数中的二阶扣分项”。</li>
+      <li>领域结论口径：理论确认 TaylorMix 的领域分配更新就是 Taylor 一阶项的分配求解。</li>
+      <li>KL 口径：KL 散度正则进一步把该信号转化为连续、可更新且保留覆盖的领域分配。</li>
+      <li>候选结论口径：理论确认 TaylorMix 的低维候选风险实现与 hidden-residual 操作曲率一致；操作曲率是参数空间二阶项的可操作代理。</li>
+      <li>理论证明必须把 Taylor 展开放在主语位置：先写清 <code>M(\theta)-M(\theta-\eta u)</code>、<code>\eta g^\top u</code> 和 <code>\frac{\eta^2}{2}u^\top H u</code>,再说明 <code>Cost_c</code>、<code>Curv_i^{op}</code>、<code>Curv_i^{sk}</code> 如何落到这些项上。不要把第 4 章写成脱离 Taylor 公式的代理指标合理性说明。</li>
+      <li>数学证明不能把在线代理量直接当作真实 Taylor 项。若 <code>Cost_c</code>、<code>U_i^{(1)}</code>、<code>Curv_i^{op}</code> 或 <code>Curv_i^{sk}</code> 替代不可观测真量,正文必须给出校准条件、误差项或 surrogate 口径,并在最终排序/界中保留这些误差。</li>
+      <li>不要把 <code>Curv_i^{sk}</code> 写成直接估计 <code>\widehat\mu_i^\top\nabla^2M(\theta)\widehat\mu_i</code> 或直接估计 Hessian。正确说法是：<code>Curv_i^{sk}</code> 低维近似 <code>Curv_i^{op}</code>，后者服务当前 batch 的二阶风险比较。</li>
+      <li>§4 末尾需要一个收束句,把 Theorem 1 与 Theorem 2 合回 TaylorMix 的两个方法动作,并自然接到系统部分:领域配额由一阶 loss 坐标驱动,候选采样由一阶有用性扣除二阶曲率风险驱动,后续系统分析围绕已校准的在线量展开。</li>
+      <li>低维实现优势：它保留候选筛选所需的二阶风险相对关系，因此在保持风险筛选有效性的同时，足够高效地支持每步在线候选筛选。</li>
+      <li>不要说“它不恢复每个样本的完整影响值”作为主句。若必须提，也要放在正向设计目标之后。</li>
+      <li>不要把定理条件如“gap 足够大”塞进 intro；留给理论章。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>系统设计写法</h2>
+    <div class="rule">
+      §5 要写成 SIGMOD/PACMMOD 系统论文中的 design section：先给系统边界，再给状态、刷新、一致性、恢复和开销边界。
+    </div>
+    <ul>
+      <li>§5 必须承接 §4 末尾的状态边界：系统嵌入围绕 <code>Cost_c</code>、<code>U_i^{(1)}</code> 和 <code>Curv_i^{sk}</code> 展开，不重新引入同义指标。</li>
+      <li>开头先说明 TaylorMix 在 RLVR 流水线中的位置：位于 rollout 前，输入训练池、历史摘要和配置，输出本步 <code>\mathcal B_t</code> 的 case 索引；rollout、reward 计算和 GRPO 更新沿用原训练流程。</li>
+      <li>系统设计不能停留在抽象原则。每节都要落到一次训练步中的具体对象和动作：case ID 队列、候选窗口、全局 batch ID 列表、worker 切片、reward 回流、checkpoint 保存项。</li>
+      <li>系统章的主线应依次覆盖：online placement、state and refresh discipline、distributed consistency and recovery、cost and state bound。每一小节都要回答该设计解决哪类系统约束。</li>
+      <li>状态表可以使用 SIGMOD 系统论文常见的 traceability 写法，但列名应服务论文论证，例如 State、Source、Refresh、Use in Selection；避免写成代码模块、类名、RPC 名或内部版本号清单。</li>
+      <li>状态表的列名和内容要贴近运行过程，例如 Runtime Source、Written Back After、Concrete Use。不要只写“来源/刷新/用途”这种过宽泛的分类。</li>
+      <li>刷新纪律要区分快变量和慢变量：reward EMA 随 rollout 回流，表示、sketch、anchors 和风险矩阵按慢时钟刷新。刷新频率如果没有实验或配置定稿，不在正文中写具体数字。</li>
+      <li>分布式一致性要写成训练语义：一个逻辑选择器产生全局有序 case ID 列表，workers 接收该列表的不同切片；恢复时领域队列位置、候选窗口边界、随机投影、anchor 集、采样随机数状态和历史摘要随 checkpoint 继续。不要写具体 trainer 子类、worker RPC 或文件路径。</li>
+      <li>开销分析可以引入复杂度符号，但首次出现必须立即解释，例如 <code>n_t</code> 表示本步实际打分的候选总数。复杂度口径要说明依赖领域数、候选窗口、sketch 维度和 anchor 数，而不是笼统写“开销很小”。</li>
+      <li>§5.4 的 cost/state bound 必须和替代路径放在同一张账单中比较，至少包括 oracle batch evaluation、全参数空间一阶候选分数、完整二阶或 influence/TRAK 式影响估计、TaylorMix sketch score。比较重点是 online work、state boundary 和适用角色。</li>
+      <li>比较完整影响估计时要谨慎：可以说通常涉及 Hessian 逆或近似 Hessian 逆,适合作为离线分析、低频重排或实验基线；不要说所有方法都精确求 Hessian 逆,也不要用“我们不需要 Hessian”这类容易被质疑的表述。</li>
+      <li>实测吞吐、显存、刷新频率和配置表应放到实验或实现细节表中；§5 正文先建立可验证的 state/cost bound。</li>
+      <li>避免把 §5 写成“实现细节补丁”。正文需要说明这些机制如何让 §3 的选择器成为可 checkpoint、可复现、可分布式运行的 online batch-composition layer。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>句式要求</h2>
+    <ul>
+      <li>优先使用：<code>针对 A，TaylorMix 做 B，从而 C</code>。</li>
+      <li><code>从而</code> 后必须接目标或效果，不要只接实现细节。</li>
+      <li>方法段优先使用：<code>为了 A，TaylorMix 做 B；具体地 C；从而 D</code>。</li>
+      <li>避免连续使用“不是…而是…”这种 AI 味对比句。</li>
+      <li>避免“只不过、只是、只需要、不恢复、没做完整”等削弱贡献的词。</li>
+      <li>避免黑话堆叠。正文要先说人话，术语行再放专业名词。</li>
+      <li>一句话中不要同时塞太多层级：领域、样本、Hessian、KL、Taylor、GRPO 不应无解释地挤在一起。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>贡献口径</h2>
+    <table>
+      <thead><tr><th>贡献</th><th>推荐表达</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>贡献 1</td>
+          <td>首次将 online RLVR 中的数据选择表述为状态驱动的受约束 batch-composition query，并联合分析领域名额分配与候选 case 筛选。</td>
+        </tr>
+        <tr>
+          <td>贡献 2</td>
+          <td>针对线性领域分配容易产生边界解的挑战，构造对齐目标一阶 loss 的 KL 散度正则分配求解，从而在优先增加目标相关领域名额的同时保留必要覆盖，避免在线训练过早陷入边界分配。</td>
+        </tr>
+        <tr>
+          <td>贡献 3</td>
+          <td>针对候选筛选容易忽略更新风险的挑战，提出只服务候选集合风险筛选的低维曲率代理，从而在保持风险筛选有效性的同时支持每步在线运行。</td>
+        </tr>
+        <tr>
+          <td>贡献 4</td>
+          <td>在真实 RLVR 训练中验证领域分配、候选风险筛选和在线选择开销三类效果。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>禁忌</h2>
+    <div class="avoid">
+      以下表达会削弱方法贡献或打断读者理解，后续修改时应主动删除或改写。
+    </div>
+    <ul>
+      <li>方法名出现前写 TaylorMix Full。</li>
+      <li>没有解释就写“曲率筛选”。</li>
+      <li>说“完整样本排序恢复不了”“不恢复完整影响值”作为主要卖点。</li>
+      <li>把 intro 图写成最终实验结论。</li>
+      <li>突然出现未解释符号、指标或内部版本名。</li>
+      <li>把理论写成“近似够用”的防守口吻。</li>
+      <li>使用“过尖”等自造词。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>修改检查清单</h2>
+    <ul class="check">
+      <li>RLVR 与 GRPO 是否在首次正文出现时写全。</li>
+      <li>TaylorMix 是否只在方法段正式引出。</li>
+      <li>每个“从而”后是否接了明确目标或效果。</li>
+      <li>候选风险是否写成不稳定更新/二阶风险，而不是泛泛的 cost。</li>
+      <li>图是否只作为风险例子，没有写成正式消融结论。</li>
+      <li>理论段是否明确说 TaylorMix 的领域分配对应一阶项，候选风险实现对应二阶项。</li>
+      <li>第 4 章每个结论是否先回到 Taylor 一阶/二阶公式，再给出算法量的在线坐标或低维保真。</li>
+      <li>低维候选风险实现是否同时强调筛选有效性和在线效率。</li>
+      <li>贡献是否按“新问题、挑战一、挑战二、实验验证”排序。</li>
+      <li>是否避免了内部实验名、版本号、未解释指标提前出场。</li>
+      <li>方法章开头是否先回应 intro 的两个缺口，再说明它如何具体化定义 2 的查询接口。</li>
+      <li>第三章每个小节是否都显式承接 intro、related work 或定义 2 的某个问题环节。</li>
+      <li>方法段是否避免了“GRPO 入口:”这类标签式写法，并将公式与正文自然分开。</li>
+      <li>方法段每个小节是否都包含“为什么做、怎么做、做完收益”。</li>
+      <li>方法段公式是否都服务于论文逻辑，而不是实现细节堆叠。</li>
+      <li>方法段每个主公式首次出现后是否有“其中，xxx 指 xxx”的符号解释。</li>
+      <li>全文每个公式符号是否都能由前文符号、当前上下文或配置项推出；首次出现或推不出的符号是否已紧随公式补充文字解释。</li>
+      <li>方法段各小节是否显式承接 intro 的两个缺口和 §4 的两个理论对应关系。</li>
+      <li>第三章小节开头是否避免“本节……”元话语，并改成承接上一环、引出当前设计动作的过渡句。</li>
+      <li>Algorithm 是否采用标准伪代码控制流：<code>Input/Output</code>、<code>for ... do</code>、<code>end for</code>、采样、集合移除、<code>return</code>，而不是自然语言步骤清单。</li>
+      <li>正文是否避免用易失效的算法行号引用，改用“领域成本与配额循环”“候选评分与 softmax 采样循环”等语义动作。</li>
+    </ul>
+  </section>
+</div>
+</body>
+</html>
